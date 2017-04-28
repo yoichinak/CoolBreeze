@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,12 +70,47 @@ namespace CoolBreeze
             set { this.SetProperty(ref this._isBusy, value); }
         }
 
+        private Plugin.Geolocator.Abstractions.Position _location;
+        public Plugin.Geolocator.Abstractions.Position Location
+        {
+            get { return this._location; }
+            set { this.SetProperty(ref this._location, value); }
+        }
+
+        private ObservableCollection<WeatherInformation> _forecast;
+        public ObservableCollection<WeatherInformation> Forecast
+        {
+            get { if (this._forecast == null) this._forecast = new ObservableCollection<WeatherInformation>(); return this._forecast; }
+            set { this.SetProperty(ref this._forecast, value); }
+        }
+
         public async void RefreshCurrentConditionsAsync()
         {
             this.IsBusy = true;
             this.NeedsRefresh = false;
 
-            WeatherInformation results = await Helpers.WeatherHelper.GetCurrentConditionsAsync(this.CityName, this.CountryCode);
+            WeatherInformation results = null;
+
+            switch (this.LocationType)
+            {
+                case LocationType.Location:
+                    try
+                    {
+                        if (this.Location == null) this.Location = await Helpers.LocationHelper.GetCurrentLocationAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine("failed to GetCurrentLocationAsync: {0}", ex.Message);
+                        break;
+                    }
+                    results = await Helpers.WeatherHelper.GetCurrentConditionsAsync(this.Location.Latitude, this.Location.Longitude);
+                    break;
+
+                case LocationType.City:
+                    results = await Helpers.WeatherHelper.GetCurrentConditionsAsync(this.CityName, this.CountryCode);
+                    break;
+            }
+
             if (results != null)
             {
                 this.CurrentConditions.Conditions = results.Conditions;
@@ -87,6 +123,35 @@ namespace CoolBreeze
                 this.CurrentConditions.Temperature = results.Temperature;
                 this.CurrentConditions.Humidity = results.Humidity;
                 this.CurrentConditions.TimeStamp = results.TimeStamp.ToLocalTime();
+            }
+
+            this.IsBusy = false;
+        }
+
+        public async void RefreshForecastAsync()
+        {
+            this.IsBusy = true;
+            this.NeedsRefresh = false;
+
+            List<WeatherInformation> results = null;
+
+            this.Forecast.Clear();
+
+            switch (this.LocationType)
+            {
+                case LocationType.Location:
+
+                    if (this.Location == null) this.Location = await Helpers.LocationHelper.GetCurrentLocationAsync();
+                    results = await Helpers.WeatherHelper.GetForecastAsync(this.Location.Latitude, this.Location.Longitude);
+                    break;
+                case LocationType.City:
+                    results = await Helpers.WeatherHelper.GetForecastAsync(this.CityName, this.CountryCode);
+                    break;
+            }
+
+            foreach (var result in results)
+            {
+                this.Forecast.Add(result);
             }
 
             this.IsBusy = false;

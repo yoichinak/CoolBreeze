@@ -5,22 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
 namespace CoolBreeze
 {
-    public partial class MainPage : ContentPage
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class ForecastPage : ContentPage
     {
-        public MainPage()
+        public ForecastPage()
         {
             InitializeComponent();
         }
-
         protected override void OnAppearing()
         {
             this.BindingContext = App.ViewModel;
-            
-            if (App.ViewModel.NeedsRefresh) App.ViewModel.RefreshCurrentConditionsAsync();
-            
+            App.ViewModel.RefreshForecastAsync();
             base.OnAppearing();
         }
     }
