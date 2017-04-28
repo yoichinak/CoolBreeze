@@ -16,9 +16,15 @@ namespace CoolBreeze
             this.IsBusy = true;
             this.NeedsRefresh = true;
             this.LocationType = LocationType.City;
-            this.CityName = "Amsterdam";
-            this.CountryCode = "NL";
             this.CurrentConditions = new WeatherInformation();
+            this.Forecast = new ObservableCollection<WeatherInformation>();
+
+            this.ChallengeSubmission = new SubmissionInformation()
+            {
+                IsSubmitted = false,
+            };
+
+            this.ChallengeSubmission.RegisterAsync(App.RegistrationCode);
         }
 
         private LocationType _locationType;
@@ -82,6 +88,13 @@ namespace CoolBreeze
         {
             get { if (this._forecast == null) this._forecast = new ObservableCollection<WeatherInformation>(); return this._forecast; }
             set { this.SetProperty(ref this._forecast, value); }
+        }
+
+        private SubmissionInformation _challengeSubmission;
+        public SubmissionInformation ChallengeSubmission
+        {
+            get { return this._challengeSubmission; }
+            set { this.SetProperty(ref this._challengeSubmission, value); }
         }
 
         public async void RefreshCurrentConditionsAsync()

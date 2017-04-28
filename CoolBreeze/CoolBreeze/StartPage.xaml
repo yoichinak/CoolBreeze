@@ -9,6 +9,7 @@
         <local:MainPage Icon="today.png" Title="NOW"/>
     </TabbedPage.Children>
     <TabbedPage.ToolbarItems>
+        <ToolbarItem Text="SUBMIT CHALLENGE" Order="Primary" Clicked="ViewSubmitChallengeClicked" />
         <ToolbarItem Text="FORECAST" Order="Primary" Icon="forecast.png" Clicked="ViewForecastClicked" />
     </TabbedPage.ToolbarItems>
 
