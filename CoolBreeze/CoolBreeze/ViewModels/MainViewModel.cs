@@ -16,6 +16,8 @@ namespace CoolBreeze
             this.IsBusy = true;
             this.NeedsRefresh = true;
             this.LocationType = LocationType.City;
+            this.CityName = "Amsterdam";
+            this.CountryCode = "NL";
             this.CurrentConditions = new WeatherInformation();
             this.Forecast = new ObservableCollection<WeatherInformation>();
 
